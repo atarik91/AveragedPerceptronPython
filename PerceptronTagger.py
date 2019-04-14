@@ -77,6 +77,7 @@ class PerceptronTagger():
                     if not guess:
                         feats = self._get_features(i, word, context, prev, prev2)
                         guess = self.model.predict(feats)
+                        #第一个参数是人工标注的,所以是正确的,第二个参数是预测值
                         self.model.update(tags[i], guess, feats)
                     prev2 = prev
                     prev = guess
