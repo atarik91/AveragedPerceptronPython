@@ -74,16 +74,16 @@ class PerceptronTagger():
                           + self.END
                 for i, word in enumerate(words):
                     guess = self.tagdict.get(word)
-                    if not guess:#如果word不在tagdict中进入if执行
+                    if not guess:  # 如果word不在tagdict中进入if执行
                         feats = self._get_features(i, word, context, prev, prev2)
                         guess = self.model.predict(feats)
-                        #第一个参数是人工标注的,所以是正确的,第二个参数是预测值
+                        # 第一个参数是人工标注的,所以是正确的,第二个参数是预测值
                         self.model.update(tags[i], guess, feats)
                     prev2 = prev
                     prev = guess
                     c += guess == tags[i]
                     n += 1
-            random.shuffle(sentences)
+            random.shuffle(sentences)  # 将序列的所有元素随机排序,shuffle()是不能直接访问的，需要导入 random 模块，然后通过 random 静态对象调用该方法
             logging.info("Iter {0}: {1}/{2}={3}".format(iter_, c, n, _pc(c, n)))
         self.model.average_weights()
         # Pickle as a binary file
@@ -147,13 +147,13 @@ class PerceptronTagger():
         add('i+2 word', context[i + 2])
         return features
 
-    def _make_tagdict(self, sentences):
+    def _make_tagdict(self, sentences):  # 制作一个高频的单词-词性字典，tagdict形如{'good':'adj','man':'n'...}
         '''Make a tag dictionary for single-tag words.'''
         counts = defaultdict(lambda: defaultdict(int))
-        for words, tags in sentences:
+        for words, tags in sentences: # words形如['good','man'],tags形如['adj','n']
             for word, tag in zip(words, tags):
                 counts[word][tag] += 1
-                self.classes.add(tag)
+                self.classes.add(tag) #将所有的词性分类标签加入到一个set中
         freq_thresh = 20
         ambiguity_thresh = 0.97
         for word, tag_freqs in counts.items():
@@ -161,6 +161,7 @@ class PerceptronTagger():
             n = sum(tag_freqs.values())
             # Don't add rare words to the tag dictionary
             # Only add quite unambiguous words
+            # 设置个阈值， 只记录高频的词性
             if n >= freq_thresh and (float(mode) / n) >= ambiguity_thresh:
                 self.tagdict[word] = tag
 
@@ -212,3 +213,5 @@ if __name__ == '__main__':
         logging.info('training corpus size : %d', len(training_data))
         logging.info('Start training...')
         tagger.train(training_data, save_loc=PICKLE)
+
+

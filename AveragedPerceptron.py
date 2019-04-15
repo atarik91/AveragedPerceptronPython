@@ -20,46 +20,47 @@ class AveragedPerceptron(object):
 
     def __init__(self):
         # Each feature gets its own weight vector, so weights is a dict-of-dicts
-        self.weights = {}
+        self.weights = {}  # 每个'位置'拥有一个权值向量
         self.classes = set()
-        # The accumulated values, for the averaging. These will be keyed by
-        # feature/clas tuples
+        # 累加的权值，用于计算平均权值
+        # 生成了一个默认为0的带key的数据字典
         self._totals = defaultdict(int)
         # The last time the feature was changed, for the averaging. Also
         # keyed by feature/clas tuples
         # (tstamps is short for timestamps)
-        self._tstamps = defaultdict(int)
-        # Number of instances seen
+        self._tstamps = defaultdict(int)  # 上次更新权值时的i
+        # 记录实例的数量
         self.i = 0
 
     def predict(self, features):
         '''Dot-product the features and current weights and return the best label.'''
-        scores = defaultdict(float)#生成一个默认dict,不存在的值返0.0
+        scores = defaultdict(float)  # 生成一个默认dict,不存在的值返0.0
         for feat, value in features.items():
             if feat not in self.weights or value == 0:
                 continue
             weights = self.weights[feat]
             for label, weight in weights.items():
-                scores[label] += value * weight
+                scores[label] += value * weight  # 每次预测一个特征值时该值都会重置
         # Do a secondary alphabetic sort, for stability
-        return max(self.classes, key=lambda label: (scores[label], label))
+        return max(self.classes, key=lambda label: (scores[label], label))  # 返回得分最高的词性标签，如果得分相同取字母大的
 
     def update(self, truth, guess, features):
         '''Update the feature weights.'''
         def upd_feat(c, f, w, v):
             param = (f, c)
-            self._totals[param] += (self.i - self._tstamps[param]) * w
-            self._tstamps[param] = self.i
-            self.weights[f][c] = w + v
+            self._totals[param] += (self.i - self._tstamps[param]) * w  # 累加:(此时的i - 上次更新该权值时的i)*权值
+            self._tstamps[param] = self.i  # 记录更新此权值时的i
+            self.weights[f][c] = w + v  # 更新权值
 
         self.i += 1
         if truth == guess:
             return None
-        for f in features:#遍历特征值,对每个特征值都加入当前判断正确和错误的词性,以及各自权值
-            weights = self.weights.setdefault(f, {})
+        for f in features:  # 遍历特征值,对每个特征值都加入当前判断正确和错误的词性,以及各自权值
+            weights = self.weights.setdefault(f, {})  # 如果字典中包含有给定键，则返回该键对应的值，否则返回为该键设置的值,并将键值加入字典中,注意和get方法的区别
             upd_feat(truth, f, weights.get(truth, 0.0), 1.0)
             upd_feat(guess, f, weights.get(guess, 0.0), -1.0)
         return None
+
 
     def average_weights(self):
         '''Average weights from all iterations.'''
@@ -71,7 +72,7 @@ class AveragedPerceptron(object):
                 total += (self.i - self._tstamps[param]) * weight
                 averaged = round(total / float(self.i), 3)
                 if averaged:
-                    new_feat_weights[clas] = averaged
+                    new_feat_weights[clas] = averaged  # 向字典中加入key-value
             self.weights[feat] = new_feat_weights
         return None
 
