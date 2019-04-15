@@ -74,7 +74,7 @@ class PerceptronTagger():
                           + self.END
                 for i, word in enumerate(words):
                     guess = self.tagdict.get(word)
-                    if not guess:
+                    if not guess:#如果word不在tagdict中进入if执行
                         feats = self._get_features(i, word, context, prev, prev2)
                         guess = self.model.predict(feats)
                         self.model.update(tags[i], guess, feats)
