@@ -34,7 +34,7 @@ class AveragedPerceptron(object):
 
     def predict(self, features):
         '''Dot-product the features and current weights and return the best label.'''
-        scores = defaultdict(float)
+        scores = defaultdict(float)#生成一个默认dict,不存在的值返0.0
         for feat, value in features.items():
             if feat not in self.weights or value == 0:
                 continue
@@ -55,7 +55,7 @@ class AveragedPerceptron(object):
         self.i += 1
         if truth == guess:
             return None
-        for f in features:
+        for f in features:#遍历特征值,对每个特征值都加入当前判断正确和错误的词性,以及各自权值
             weights = self.weights.setdefault(f, {})
             upd_feat(truth, f, weights.get(truth, 0.0), 1.0)
             upd_feat(guess, f, weights.get(guess, 0.0), -1.0)
