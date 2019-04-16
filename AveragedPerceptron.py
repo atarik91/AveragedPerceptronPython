@@ -6,13 +6,13 @@
 Averaged perceptron classifier. Implementation geared for simplicity rather than
 efficiency.
 """
+import logging
 from collections import defaultdict
 import pickle
 import random
 
 
 class AveragedPerceptron(object):
-
     '''An averaged perceptron, as implemented by Matthew Honnibal.
     See more implementation details here:
         http://honnibal.wordpress.com/2013/09/11/a-good-part-of-speechpos-tagger-in-about-200-lines-of-python/
@@ -31,6 +31,7 @@ class AveragedPerceptron(object):
         self._tstamps = defaultdict(int)  # 上次更新权值时的i
         # 记录实例的数量
         self.i = 0
+        self.iii = 0  # 自己测试用
 
     def predict(self, features):
         '''Dot-product the features and current weights and return the best label.'''
@@ -46,21 +47,35 @@ class AveragedPerceptron(object):
 
     def update(self, truth, guess, features):
         '''Update the feature weights.'''
+
         def upd_feat(c, f, w, v):
             param = (f, c)
             self._totals[param] += (self.i - self._tstamps[param]) * w  # 累加:(此时的i - 上次更新该权值时的i)*权值
             self._tstamps[param] = self.i  # 记录更新此权值时的i
             self.weights[f][c] = w + v  # 更新权值
 
-        self.i += 1
+        self.i += 1  # 一个word对应于一个features,每处理一个word后i值+1
         if truth == guess:
             return None
         for f in features:  # 遍历特征值,对每个特征值都加入当前判断正确和错误的词性,以及各自权值
             weights = self.weights.setdefault(f, {})  # 如果字典中包含有给定键，则返回该键对应的值，否则返回为该键设置的值,并将键值加入字典中,注意和get方法的区别
             upd_feat(truth, f, weights.get(truth, 0.0), 1.0)
             upd_feat(guess, f, weights.get(guess, 0.0), -1.0)
-        return None
 
+            '''以下为自己测试用'''
+            f_tmp = "bias"
+            cla = "zz1_np1@\n"
+            param_tmp = (f_tmp, cla)
+            if f == f_tmp:
+                tmp = self.weights.get(f_tmp, None)
+                logging.info(self._totals[("bias", "zz1_np1@\n")])
+                if tmp != None:
+                    logging.info(self.weights.get(f_tmp).get(cla))
+                else:
+                    logging.info(None)
+                logging.info("*******************************" + str(self.i) + "****" + str(self._tstamps[param_tmp]))
+                self.iii += 1
+        return None
 
     def average_weights(self):
         '''Average weights from all iterations.'''

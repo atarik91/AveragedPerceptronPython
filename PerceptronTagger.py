@@ -66,8 +66,8 @@ class PerceptronTagger():
         self._make_tagdict(sentences)
         self.model.classes = self.classes
         for iter_ in range(nr_iter):
-            c = 0
-            n = 0
+            c = 0  # 预测正确的个数
+            n = 0  # 总个数
             for words, tags in sentences:
                 prev, prev2 = self.START
                 context = self.START + [self._normalize(w) for w in words] \
