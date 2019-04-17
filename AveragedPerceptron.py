@@ -50,7 +50,7 @@ class AveragedPerceptron(object):
 
         def upd_feat(c, f, w, v):
             param = (f, c)
-            self._totals[param] += (self.i - self._tstamps[param]) * w  # 累加:(此时的i - 上次更新该权值时的i)*权值
+            self._totals[param] += (self.i - self._tstamps[param]) * w  # 累加:(此时的i - 上次更新该权值时的i)*权值(该处理解为当i至self._tstamps[param]处没有该特征出现,但是求均值是要算在分母里的)
             self._tstamps[param] = self.i  # 记录更新此权值时的i
             self.weights[f][c] = w + v  # 更新权值
 
